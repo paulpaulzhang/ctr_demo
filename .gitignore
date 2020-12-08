@@ -1,0 +1,9 @@
+/venv/
+/.idea/inspectionProfiles/
+/data/
+/.idea/vcs.xml
+/.idea/other.xml
+/.idea/modules.xml
+/.idea/misc.xml
+/.idea/ctr_demo.iml
+/.idea/.gitignore

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>小智推荐系统</title>
+
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+
+    <script src="../static/js/jquery-3.4.0.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+    <script src="../static/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="icon" type="image/x-icon" href="#"/>
+    <link type="text/css" rel="styleSheet" href="../static/css/login.css"/>
+
+    <style>
+
+        .navbar-menu img {
+            width: 35px;
+            height: 35px;
+        }
+
+        #title {
+            margin-left: 10%;
+        }
+
+    </style>
+</head>
+<body>
+<div id="bg">
+    <div id="toast"><!-- 提示框 -->
+        <p>登录失败</p>
+    </div>
+    <div id="login_wrap">
+        <div id="login"><!-- 登录注册切换动画 -->
+            <div id="status">
+                <i style="top: 0; font-size: 20pt; cursor: default;">登录</i>
+            </div>
+            <span>
+                    <form action="post">
+                        <p class="form"><input type="text" id="user" placeholder="用户名" name="username"></p>
+                        <p class="form"><input type="password" id="passwd" placeholder="密码" name="password"></p>
+                        <input type="button" value="登录" class="btn" onclick="login()" id="btn_login"
+                               style="margin-right: 20px;">
+                    </form>
+
+                </span>
+        </div>
+
+        <div id="login_img"><!-- 图片绘制框 -->
+            <span class="circle">
+                    <span></span>
+                    <span></span>
+                </span>
+            <span class="star">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            <span class="fly_star">
+                    <span></span>
+                    <span></span>
+                </span>
+            <p id="title" style="position: relative; left: -25px; cursor: default">小智推荐系统</p>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    const user = document.getElementById("user");
+    const passwd = document.getElementById("passwd");
+
+    //自动居中title
+    const name_c = document.getElementById("title");
+    let name = name_c.innerHTML.split("");
+    name_c.innerHTML = "";
+    for (let i = 0; i < name.length; i++) {
+        if (name[i] !== ",") {
+            name_c.innerHTML += "<i>" + name[i] + "</i>";
+        }
+    }
+
+    //引用hint()在最上方弹出提示
+    function hint() {
+        let toast = document.getElementById("toast");
+        toast.style.display = "block";
+        setTimeout(function () {
+            toast.style.opacity = '1';
+        }, 0);
+        setTimeout(function () {
+            toast.style.opacity = '0';
+        }, 3000);
+    }
+
+    //登录按钮
+    function login() {
+        let toast = document.getElementById("toast").getElementsByTagName("p")[0];
+
+        if (user.value === '' || passwd.value === '') {
+            toast.innerHTML = '用户名和密码不能为空';
+            hint();
+            return;
+        }
+        $.ajax({
+            url: "{{ url_for('app_login.user_login') }}",
+            data: {username: user.value, password: passwd.value},
+            type: 'POST',
+            success: function (response) {
+                if (response === 'ok') {
+                    window.location.href = "{{ url_for('app_home.home_page') }}"
+                } else {
+                    console.log(response);
+                    toast.innerHTML = response;
+                    hint();
+                }
+            },
+            error: function (response) {
+                toast.innerHTML = response;
+                hint();
+            }
+        })
+
+    }
+
+</script>
+</html>

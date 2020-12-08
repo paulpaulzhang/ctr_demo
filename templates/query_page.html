@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block head %}
+    <style>
+        #card-query {
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+            border: 0;
+            top: 80px;
+            position: -webkit-sticky;
+            position: sticky;
+            z-index: 100;
+            margin: 20px 50px 30px;
+
+
+        }
+
+        label {
+            text-align: center;
+            margin-left: 20px;
+            margin-bottom: 0;
+        }
+
+        .label-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        #button-query {
+            height: 38px;
+            width: 38px;
+            margin: 0;
+            padding: 0;
+        }
+
+        #card-info {
+            margin-top: 80px;
+            margin-left: 0;
+            margin-right: 0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+            border: 0;
+            padding: 20px;
+        }
+
+        td, th, p, span, h5, h6 {
+            cursor: default;
+        }
+
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="card" id="card-query">
+            <div class="row">
+                <div class="col">
+                    <div class="row">
+                        <div class="col-3 label-group">
+                            <label for="select-user">用户GUID</label>
+                        </div>
+                        <div class="col">
+                            <select class="form-control" id="select-user">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-1">
+                    <button class="btn btn-primary" id="button-query">
+                        <img src="../static/img/query_circle.svg" width="30" height="30" alt="query">
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="card-info">
+
+            <table class="table" id="table-info">
+                <thead>
+                <tr>
+                    <th class="text-center">#</th>
+                    <th class="text-center" scope="col">广告ID</th>
+                    <th class="text-center" scope="col">推荐位置</th>
+                    <th class="text-center" scope="col">曝光时间</th>
+                    <th class="text-center" scope="col">预测概率</th>
+                </tr>
+                </thead>
+                <tbody id="tbody-info">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        let info = null;
+        let cur_user = null;
+        let select_user = $('#select-user');
+        $.ajax({
+            url: "{{ url_for('app_query.get_query_info') }}",
+            type: "POST",
+            success: function (response) {
+                info = JSON.parse(response);
+                init_query_info(info);
+                query(cur_user);  /** 待处理 ！！！！！！！！！ **/
+            },
+            error: function () {
+
+            }
+        });
+
+        $('#button-query').click(function () {
+            query(cur_user);
+        });
+
+
+        function query(user) {
+            $.ajax({
+                url: "{{ url_for('app_query.query') }}",
+                data: {user: user},
+                type: "POST",
+                success: function (response) {
+                    add_rows(response);
+                },
+                error: function () {
+
+                }
+            })
+        }
+
+        function add_rows(response) {
+            let result = JSON.parse(response);
+            let tbody = $('#tbody-info');
+            tbody.html('');
+            for (let i = 0; i < result.length; i++) {
+                const item = result[i];
+                const html = "<tr class='grade-row' >\n" +
+                    "                    <th class='text-center' scope='row'>" + (i + 1) + "</th>\n" +
+                    "                    <td class='text-center'>" + item.newsid + "</td>\n" +
+                    "                    <td class='text-center'>" + item.pos + "</td>\n" +
+                    "                    <td class='text-center'>" + item.ts + "</td>\n" +
+                    "                    <td class='text-center'>" + item.target + "</td>\n" +
+                    "                </tr>";
+                tbody.append(html);
+            }
+        }
+
+
+        function init_query_info(info) {
+            let user_html = "";
+            for (let i = 0; i < info.length; i++) {
+                user_html += "<option>" + info[i] + "</option>";
+            }
+            cur_user = info[0];
+            select_user.html(user_html);
+        }
+
+        select_user.change(function () {
+            cur_user = $(this).val();
+        })
+    </script>
+{% endblock %}
